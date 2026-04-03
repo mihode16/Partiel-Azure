@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mon TP Azure Full Stack</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 50px;
+      }
+      input {
+        padding: 10px;
+        width: 250px;
+      }
+      button {
+        padding: 10px;
+        cursor: pointer;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        background: #f4f4f4;
+        margin: 5px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gestionnaire de Tâches Azure</h1>
+    <input type="text" id="taskInput" placeholder="Nouvelle tâche..." />
+    <button onclick="addTask()">Ajouter</button>
+    <ul id="taskList"></ul>
+
+    <script>
+      // ATTENTION : Remplace l'URL par celle de ton App Service Backend après déploiement
+      const API_URL = "https://ton-backend-azure.azurewebsites.net";
+
+      async function fetchTasks() {
+        const res = await fetch(`${API_URL}/tasks`);
+        const tasks = await res.json();
+        const list = document.getElementById("taskList");
+        list.innerHTML = tasks.map((t) => `<li>${t.title}</li>`).join("");
+      }
+
+      async function addTask() {
+        const input = document.getElementById("taskInput");
+        await fetch(`${API_URL}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: input.value }),
+        });
+        input.value = "";
+        fetchTasks();
+      }
+
+      fetchTasks();
+    </script>
+  </body>
+</html>
