@@ -1,45 +1,48 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// CONNEXION À AZURE COSMOS DB
-// La variable d'environnement sera configurée dans le portail Azure
-const mongoURI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/tp_azure";
-
-mongoose
-  .connect(mongoURI)
-  .then(() => console.log("Connecté à Azure Cosmos DB"))
-  .catch((err) => console.error("Erreur de connexion :", err));
-
-// Modèle de données
-const Task = mongoose.model("Task", { title: String });
-
-// Routes API
-app.get("/tasks", async (req, res) => {
-  const tasks = await Task.find();
-  res.json(tasks);
-});
-
-app.post("/tasks", async (req, res) => {
-  const newTask = new Task({ title: req.body.title });
-  await newTask.save();
-  res.status(201).json(newTask);
-});
-
-const path = require('path');
-
-// ... après les middlewares (app.use(cors)...)
+// Sert les fichiers statiques (le frontend)
 app.use(express.static('.'));
 
+// Connexion à Azure Cosmos DB via la variable d'environnement configurée sur le portail
+const mongoURI = process.env.MONGODB_URI;
+
+mongoose.connect(mongoURI)
+  .then(() => console.log("Connecté à Azure Cosmos DB"))
+  .catch(err => console.error("Erreur de connexion :", err));
+
+const Task = mongoose.model('Task', { title: String });
+
+// Routes API
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await Task.find();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.post('/tasks', async (req, res) => {
+  try {
+    const newTask = new Task({ title: req.body.title });
+    await newTask.save();
+    res.status(201).json(newTask);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+// Route pour servir l'index.html sur la racine
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Port d'écoute (Azure définit automatiquement le PORT)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
