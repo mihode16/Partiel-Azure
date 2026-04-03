@@ -31,6 +31,15 @@ app.post("/tasks", async (req, res) => {
   res.status(201).json(newTask);
 });
 
+const path = require('path');
+
+// ... après les middlewares (app.use(cors)...)
+app.use(express.static('.'));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Port d'écoute (Azure définit automatiquement le PORT)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
