@@ -7,10 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Sert les fichiers statiques (le frontend)
 app.use(express.static('.'));
 
-// Connexion à Azure Cosmos DB via la variable d'environnement configurée sur le portail
+
 const mongoURI = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURI)
@@ -39,7 +38,6 @@ app.post('/tasks', async (req, res) => {
   }
 });
 
-// Route pour servir l'index.html sur la racine
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
